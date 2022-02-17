@@ -1,12 +1,17 @@
-plugins {
+plugins
+{
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-android'
 }
 
-android {
+android
+{
     compileSdk 32
+    buildToolsVersion "30.0.3"
 
-    defaultConfig {
+    defaultConfig
+    {
         applicationId "com.example.mask_app_android"
         minSdk 21
         targetSdk 32
@@ -16,25 +21,40 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        release {
+    buildTypes
+    {
+        release
+        {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
+    compileOptions
+    {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
+    kotlinOptions
+    {
         jvmTarget = '1.8'
+    }
+
+
+    /*新版 kotlin 1.4.2 官方正式宣布廢棄 Kotlin Android Extension (KAE)。
+    過往使用 KAE 最大好處，就是可以透過 synthetic 少打定義和 findViewById。
+    但實際這樣使用，其實延伸出不少問題。
+    官方廢棄 synthetic 當然不是鼓勵大家回去用 findViewById 或 ButterKnife
+    而是很清楚明白的跟大家建議使用 View Binding。*/
+    buildFeatures
+    {
+        viewBinding true
     }
 }
 
 /*this block means when u want to use the 3rd  party software service, then u must add in this block
 like okhttp*/
-dependencies {
-    implementation 'com.squareup.okhttp3:okhttp:4.9.0'  //mask app project
+dependencies
+{
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.5.0'
@@ -42,4 +62,13 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'  //mask app project
+
+    /*加入以下implementation可以利用okhttp的這個功能回傳並印出網頁的一些狀態
+    ，例如連線的網址、回應狀態碼和連線回應的花費的時間*/
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0' //for okhttp
+
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
