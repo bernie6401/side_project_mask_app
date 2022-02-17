@@ -69,6 +69,6 @@ dependencies
     ，例如連線的網址、回應狀態碼和連線回應的花費的時間*/
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0' //for okhttp
 
-    implementation fileTree(dir: "libs", include: ["*.jar"])
+//    implementation fileTree(dir: "libs", include: ["*.jar"])
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

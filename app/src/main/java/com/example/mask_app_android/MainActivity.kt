@@ -3,13 +3,20 @@
 package com.example.mask_app_android
 
 /*以下為預設library*/
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 
 //以下為新增library
 import android.util.Log
+import androidx.annotation.RequiresApi
 import okhttp3.*
 import com.example.mask_app_android.databinding.ActivityMainBinding
+
+//json library
+import org.json.JSONArray
+import org.json.JSONObject
+import java.lang.StringBuilder
 
 
 class MainActivity : AppCompatActivity()
@@ -59,22 +66,55 @@ class MainActivity : AppCompatActivity()
         /*enqueue就是禁止以下程式在主執行緒(main thread)下運行，原因是這樣耗時的工作應該另外開一條執行緒才不會卡住*/
         call.enqueue(object : Callback
         {
-            override fun onFailure(call: okhttp3.Call, e: java.io.IOException)
-            {Log.d("HKT", "onFailure: $e")}
+            override fun onFailure(call: Call, e: java.io.IOException)
+            {Log.d("SBK", "onFailure: $e")}
 
 
             //以下部分是我們跟url做request後得到的response
-            override fun onResponse(call: okhttp3.Call, response: Response)
+            @RequiresApi(Build.VERSION_CODES.O)
+            override fun onResponse(call: Call, response: Response)
             {
                 /*response.body?.string()就是我們從url的server取得的資料，切記不可重複拿兩次以上，
                 會報error，另外直接print response是沒有資料的，必須透過body?.string的轉換才可以*/
                 val pharmacyData = response.body?.string()
-                //Log.d("HKT", "onResponse: $pharmacyData")//原本pharmacy_data是-->{response.body?.string()}
+                //Log.d("HKT", "onResponse: $pharmacyData")//原本pharmacyData是-->{response.body?.string()}
+
+                //將 pharmaciesData 整包字串資料，轉成 JSONObject 格式
+                val phDataJson = JSONObject(pharmacyData)   //此時phDataJson是org.json.JSONObject格式
+
+                //這個時候，我們就可以透過 getString 的方式，裡面放 key (name) 值，
+                //即可以獲取到最外層的 type 欄位資料值。
+                /*android.util.Log常用的方法有以下5個：Log.v() Log.d() Log.i() Log.w() 和Log.e()。
+                根據首字母對應VERBOSE，DEBUG , INFO , WARN，ERROR。
+                1、Log.v 為 黑色 的，任何消息都會輸出，這裡的v代表verbose囉嗦的意思，平時使用就是Log.v("","")。
+                2、Log.d 為 藍色 的，僅輸出debug調試的意思，但他會輸出上層的信息，過濾起來可以通過DDMS的Logcat標籤來選擇。
+                3、Log.i 為 綠色 的，一般提示性的消息information，它不會輸出Log.v和Log.d的信息，但會顯示i、w和e的信息。
+                4、Log.w 為 橙色 的，可以看作為warning警告，一般需要我們注意優化Android代碼，同時選擇它後還會輸出Log.e的信息。
+                5、Log.e 為 紅色 的，可以想到error錯誤，這裡僅顯示紅色的錯誤信息，這些錯誤就需要我們認真的分析，查看棧的信息了。*/
+                //Log.v("SBK", phDataJson.getString("type"))
+
+                //features 是一個陣列 [] ，需要將他轉換成 JSONArray
+                val phDataArray = JSONArray(phDataJson.getString("features")) //此時phDataJson是org.json.JSONObject格式
+
+                //藥局名稱變數宣告
+                //var phName: String = "" //如果用string處理串接文字，當資料很多時很容易造成 OOM 記憶體不足，建議換成 StringBuilder
+                var phName = StringBuilder()
+
+                //透過 for 迴圈，即可以取出所有的藥局名稱
+                for (i in 0 until phDataArray.length())
+                {
+                    val properties = phDataArray.getJSONObject(i).getString("properties")   //此時properties是java.lang.String
+                    val property = JSONObject(properties)   //org.json.JSONObject
+                    //將每次獲取到的藥局名稱，多加跳行符號，存到變數中
+                    //phName += phName + property.getString("name") + "\n"
+                    phName.append(property.getString("name") + "\n")
+                }
 
                 /*要加上runOnUiThread是因為取得資料是在背景的環境下，而顯示要顯示在主要畫面，
                 而處理主要畫面就是main thread的事情，因此必須要加上這個code做資料的轉換，才能顯示在畫面上*/
                 runOnUiThread{
-                    binding.tvPharmacyData.text = pharmacyData
+                    //binding.tvPharmacyData.text = pharmacyData
+                    binding.tvPharmacyData.text = phName
                 }
 
             }

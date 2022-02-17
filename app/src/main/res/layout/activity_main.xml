@@ -20,7 +20,7 @@
         就是告訴程式上下左右各要對齊誰-->
 
         <TextView
-            android:id="@+id/tv_pharmacy_data"
+            android:id="@+id/tv_Pharmacy_Data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Hello SBK!" /><!--有無預設值都沒關係-->
